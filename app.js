@@ -1,5 +1,6 @@
 const express = require('express');
 const expense = require('./src/views/expense');
+const { sequelize } = require('./src/models/db');
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,8 @@ app.post('/expenses', expense.criar);
 app.put('/expenses/:id', expense.atualizar);
 app.delete('/expenses/:id', expense.remover);
 
-app.listen(3000, () => {
-    console.log("Servidor rodando em http://localhost:3000");
+sequelize.sync().then(() => {
+    app.listen(3000, () => {
+        console.log("Servidor rodando em http://localhost:3000");
+    });
 });

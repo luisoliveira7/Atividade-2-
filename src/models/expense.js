@@ -1,97 +1,76 @@
-const fs = require('fs').promises;
+const { sequelize } = require('./db');
+const { DataTypes } = require('sequelize');
 
-async function lerArquivo() {
-    try {
-        const data = await fs.readFile('expenses.json', 'utf8');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
+const Expense = sequelize.define('expenses', {
+    id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    title: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    amount: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
+    category: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    date: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
+});
+
+async function getAll() {
+    return await Expense.findAll();
 }
 
-async function escreverArquivo(data) {
-    try {
-        await fs.writeFile('expenses.json', JSON.stringify(data, null, 2), 'utf8');
-    } catch (e) {
-        console.error(e);
-    }
+async function getById(id) {
+    return await Expense.findByPk(id);
 }
 
-function criarExpense(dados, id) {
-    return {
-        id: String(id),
+async function criar(dados) {
+    return await Expense.create({
         title: dados.title,
         amount: dados.amount,
         category: dados.category,
         date: dados.date,
-        description: dados.description,
-        createdAt: new Date()
-    };
-}
-
-async function getAll() {
-    return await lerArquivo();
-}
-
-async function getById(id) {
-    const expenses = await lerArquivo();
-    for (let expense of expenses) {
-        if (expense.id === String(id)) {
-            return expense;
-        }
-    }
-    return null;
-}
-
-async function criar(dados) {
-    const expenses = await lerArquivo();
-    let id = 0;
-    for (let expense of expenses) {
-        if (id < Number(expense.id)) {
-            id = Number(expense.id);
-        }
-    }
-    const novo = criarExpense(dados, id + 1);
-    expenses.push(novo);
-    await escreverArquivo(expenses);
-    return novo;
+        description: dados.description
+    });
 }
 
 async function atualizar(id, dados) {
-    const expenses = await lerArquivo();
-    for (let expense of expenses) {
-        if (expense.id === String(id)) {
-            expense.title = dados.title || expense.title;
-            expense.amount = dados.amount || expense.amount;
-            expense.category = dados.category || expense.category;
-            expense.date = dados.date || expense.date;
-            expense.description = dados.description || expense.description;
-            await escreverArquivo(expenses);
-            return expense;
-        }
-    }
-    return null;
+    const expense = await getById(id);
+    if (!expense) return null;
+
+    expense.title = dados.title || expense.title;
+    expense.amount = dados.amount || expense.amount;
+    expense.category = dados.category || expense.category;
+    expense.date = dados.date || expense.date;
+    expense.description = dados.description || expense.description;
+
+    await expense.save();
+    return expense;
 }
 
 async function remover(id) {
-    const expenses = await lerArquivo();
-    let novoVetor = [];
-    let existe = false;
-    for (let expense of expenses) {
-        if (expense.id === String(id)) {
-            existe = true;
-        } else {
-            novoVetor.push(expense);
-        }
-    }
-    if (existe) {
-        await escreverArquivo(novoVetor);
-    }
-    return existe;
+    const expense = await getById(id);
+    if (!expense) return false;
+
+    await expense.destroy();
+    return true;
 }
 
 async function somaTotal() {
-    const expenses = await lerArquivo();
+    const expenses = await Expense.findAll();
     let total = 0;
     for (let expense of expenses) {
         total += expense.amount;
@@ -100,7 +79,7 @@ async function somaTotal() {
 }
 
 async function somaPorCategoria() {
-    const expenses = await lerArquivo();
+    const expenses = await Expense.findAll();
     let categorias = {};
     for (let expense of expenses) {
         if (!categorias[expense.category]) {
