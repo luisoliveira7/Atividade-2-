@@ -15,9 +15,15 @@ const Expense = sequelize.define('expenses', {
         type: DataTypes.FLOAT,
         allowNull: false
     },
-    category: {
-        type: DataTypes.STRING,
-        allowNull: true
+    categoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'categories',
+            key: 'id'
+        },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
     },
     date: {
         type: DataTypes.STRING,
@@ -41,7 +47,7 @@ async function criar(dados) {
     return await Expense.create({
         title: dados.title,
         amount: dados.amount,
-        category: dados.category,
+        categoryId: dados.categoryId,
         date: dados.date,
         description: dados.description
     });
@@ -53,7 +59,7 @@ async function atualizar(id, dados) {
 
     expense.title = dados.title || expense.title;
     expense.amount = dados.amount || expense.amount;
-    expense.category = dados.category || expense.category;
+    expense.categoryId = dados.categoryId || expense.categoryId;
     expense.date = dados.date || expense.date;
     expense.description = dados.description || expense.description;
 
@@ -82,12 +88,12 @@ async function somaPorCategoria() {
     const expenses = await Expense.findAll();
     let categorias = {};
     for (let expense of expenses) {
-        if (!categorias[expense.category]) {
-            categorias[expense.category] = 0;
+        if (!categorias[expense.categoryId]) {
+            categorias[expense.categoryId] = 0;
         }
-        categorias[expense.category] += expense.amount;
+        categorias[expense.categoryId] += expense.amount;
     }
     return categorias;
 }
 
-module.exports = { getAll, getById, criar, atualizar, remover, somaTotal, somaPorCategoria };
+module.exports = { getAll, getById, criar, atualizar, remover, somaTotal, somaPorCategoria, Expense };

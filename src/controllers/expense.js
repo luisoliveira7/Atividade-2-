@@ -18,13 +18,26 @@ function links(id) {
     ];
 }
 
+function formatar(expense) {
+    return {
+        id: expense.id,
+        title: expense.title,
+        amount: expense.amount,
+        categoryId: expense.categoryId,
+        date: expense.date,
+        description: expense.description,
+        createdAt: expense.createdAt,
+        updatedAt: expense.updatedAt,
+        _links: links(expense.id)
+    };
+}
+
 async function getAll(req, res) {
     const expenses = await Expense.getAll();
     if (!expenses || expenses.length === 0) {
         return res.status(200).json({ message: "Nenhuma despesa cadastrada", _links: links() });
     }
-    const resultado = expenses.map(e => ({ ...e, _links: links(e.id) }));
-    return res.status(200).json({ data: resultado, _links: links() });
+    return res.status(200).json({ data: expenses.map(formatar), _links: links() });
 }
 
 async function getById(req, res) {
@@ -33,7 +46,7 @@ async function getById(req, res) {
     if (!item) {
         return res.status(404).json({ error: "Não encontrado" });
     }
-    return res.status(200).json({ ...item, _links: links(id) });
+    return res.status(200).json(formatar(item));
 }
 
 async function criar(req, res) {
@@ -48,7 +61,7 @@ async function criar(req, res) {
         return res.status(400).json({ error: "Data inválida" });
     }
     const novo = await Expense.criar(req.body);
-    return res.status(201).json({ ...novo, _links: links(novo.id) });
+    return res.status(201).json(formatar(novo));
 }
 
 async function atualizar(req, res) {
@@ -64,7 +77,7 @@ async function atualizar(req, res) {
     if (!atualizado) {
         return res.status(404).json({ error: "Não encontrado" });
     }
-    return res.status(200).json({ ...atualizado, _links: links(id) });
+    return res.status(200).json(formatar(atualizado));
 }
 
 async function remover(req, res) {
