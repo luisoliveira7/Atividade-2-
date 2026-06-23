@@ -9,11 +9,18 @@ const Category = sequelize.define('categories', {
     },
     nome: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: { msg: 'Nome não pode ser vazio' },
+            len: { args: [2, 100], msg: 'Nome deve ter entre 2 e 100 caracteres' }
+        }
     },
     descricao: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
+        validate: {
+            len: { args: [0, 255], msg: 'Descrição deve ter no máximo 255 caracteres' }
+        }
     }
 });
 

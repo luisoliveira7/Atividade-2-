@@ -9,20 +9,34 @@ const Expense = sequelize.define('expenses', {
     },
     descricao: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: { msg: 'Descrição não pode ser vazia' },
+            len: { args: [2, 255], msg: 'Descrição deve ter entre 2 e 255 caracteres' }
+        }
     },
     valor: {
         type: DataTypes.FLOAT,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            isFloat: { msg: 'Valor deve ser um número' },
+            min: { args: [0.01], msg: 'Valor deve ser maior que zero' }
+        }
     },
     data: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: { msg: 'Data não pode ser vazia' }
+        }
     },
     status: {
         type: DataTypes.ENUM('PENDENTE', 'PAGA'),
         allowNull: false,
-        defaultValue: 'PENDENTE'
+        defaultValue: 'PENDENTE',
+        validate: {
+            isIn: { args: [['PENDENTE', 'PAGA']], msg: 'Status deve ser PENDENTE ou PAGA' }
+        }
     },
     categoriaId: {
         type: DataTypes.INTEGER,
