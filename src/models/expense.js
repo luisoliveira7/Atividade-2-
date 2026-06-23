@@ -7,15 +7,24 @@ const Expense = sequelize.define('expenses', {
         autoIncrement: true,
         primaryKey: true
     },
-    title: {
+    descricao: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    amount: {
+    valor: {
         type: DataTypes.FLOAT,
         allowNull: false
     },
-    categoryId: {
+    data: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.ENUM('PENDENTE', 'PAGA'),
+        allowNull: false,
+        defaultValue: 'PENDENTE'
+    },
+    categoriaId: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
@@ -25,18 +34,20 @@ const Expense = sequelize.define('expenses', {
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE'
     },
-    date: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    description: {
-        type: DataTypes.STRING,
-        allowNull: true
+    usuarioId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'users',
+            key: 'id'
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     }
 });
 
-async function getAll() {
-    return await Expense.findAll();
+async function getAll(where) {
+    return await Expense.findAll({ where });
 }
 
 async function getById(id) {
@@ -44,24 +55,18 @@ async function getById(id) {
 }
 
 async function criar(dados) {
-    return await Expense.create({
-        title: dados.title,
-        amount: dados.amount,
-        categoryId: dados.categoryId,
-        date: dados.date,
-        description: dados.description
-    });
+    return await Expense.create(dados);
 }
 
 async function atualizar(id, dados) {
     const expense = await getById(id);
     if (!expense) return null;
 
-    expense.title = dados.title || expense.title;
-    expense.amount = dados.amount || expense.amount;
-    expense.categoryId = dados.categoryId || expense.categoryId;
-    expense.date = dados.date || expense.date;
-    expense.description = dados.description || expense.description;
+    expense.descricao = dados.descricao || expense.descricao;
+    expense.valor = dados.valor || expense.valor;
+    expense.data = dados.data || expense.data;
+    expense.status = dados.status || expense.status;
+    expense.categoriaId = dados.categoriaId || expense.categoriaId;
 
     await expense.save();
     return expense;
@@ -75,25 +80,4 @@ async function remover(id) {
     return true;
 }
 
-async function somaTotal() {
-    const expenses = await Expense.findAll();
-    let total = 0;
-    for (let expense of expenses) {
-        total += expense.amount;
-    }
-    return { total };
-}
-
-async function somaPorCategoria() {
-    const expenses = await Expense.findAll();
-    let categorias = {};
-    for (let expense of expenses) {
-        if (!categorias[expense.categoryId]) {
-            categorias[expense.categoryId] = 0;
-        }
-        categorias[expense.categoryId] += expense.amount;
-    }
-    return categorias;
-}
-
-module.exports = { getAll, getById, criar, atualizar, remover, somaTotal, somaPorCategoria, Expense };
+module.exports = { getAll, getById, criar, atualizar, remover, Expense };

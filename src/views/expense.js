@@ -20,12 +20,4 @@ async function remover(req, res) {
     return expenseController.remover(req, res);
 }
 
-async function somaTotal(req, res) {
-    return expenseController.somaTotal(req, res);
-}
-
-async function somaPorCategoria(req, res) {
-    return expenseController.somaPorCategoria(req, res);
-}
-
-module.exports = { getAll, getById, criar, atualizar, remover, somaTotal, somaPorCategoria };
+module.exports = { getAll, getById, criar, atualizar, remover };

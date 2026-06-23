@@ -18,11 +18,11 @@ async function getById(req, res) {
 }
 
 async function criar(req, res) {
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ error: "Name obrigatório" });
+    const { nome, descricao } = req.body;
+    if (!nome) {
+        return res.status(400).json({ error: "Nome obrigatório" });
     }
-    const nova = await CategoryModel.criar(req.body);
+    const nova = await CategoryModel.criar({ nome, descricao });
     return res.status(201).json(nova);
 }
 

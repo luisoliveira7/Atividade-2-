@@ -1,32 +1,30 @@
 const express = require('express');
-const expense = require('./src/views/expense');
-const category = require('./src/views/category');
-const user = require('./src/views/user');
-const authMiddleware = require('./src/middleware/auth');
 const { sequelize } = require('./src/models/db');
+const authMiddleware = require('./src/middlewares/auth');
 require('./src/models/associations');
+
+const userRoutes = require('./src/routes/user');
+const authRoutes = require('./src/routes/auth');
+const categoryRoutes = require('./src/routes/category');
+const expenseRoutes = require('./src/routes/expense');
+const dashboardRoutes = require('./src/routes/dashboard');
 
 const app = express();
 app.use(express.json());
 
-app.post('/users/register', user.register);
-app.post('/users/login', user.login);
+app.use('/users', userRoutes);
+app.use('/auth', authRoutes);
 
 app.use(authMiddleware);
 
-app.get('/expenses', expense.getAll);
-app.get('/expenses/summary/total', expense.somaTotal);
-app.get('/expenses/summary/category', expense.somaPorCategoria);
-app.get('/expenses/:id', expense.getById);
-app.post('/expenses', expense.criar);
-app.put('/expenses/:id', expense.atualizar);
-app.delete('/expenses/:id', expense.remover);
+app.use('/categories', categoryRoutes);
+app.use('/expenses', expenseRoutes);
+app.use('/dashboard', dashboardRoutes);
 
-app.get('/categories', category.getAll);
-app.get('/categories/:id', category.getById);
-app.post('/categories', category.criar);
-app.put('/categories/:id', category.atualizar);
-app.delete('/categories/:id', category.remover);
+app.use((err, req, res, next) => {
+    console.error(err.message);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+});
 
 sequelize.sync().then(() => {
     app.listen(3000, () => {

@@ -1,12 +1,23 @@
-const { Expense } = require('./expense');
+const { User } = require('./user');
 const { Category } = require('./category');
+const { Expense } = require('./expense');
+
+User.hasMany(Expense, {
+    foreignKey: 'usuarioId',
+    as: 'expenses'
+});
+
+Expense.belongsTo(User, {
+    foreignKey: 'usuarioId',
+    as: 'usuario'
+});
 
 Category.hasMany(Expense, {
-    foreignKey: 'categoryId',
+    foreignKey: 'categoriaId',
     as: 'expenses'
 });
 
 Expense.belongsTo(Category, {
-    foreignKey: 'categoryId',
+    foreignKey: 'categoriaId',
     as: 'category'
 });

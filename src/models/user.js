@@ -7,16 +7,16 @@ const User = sequelize.define('users', {
         autoIncrement: true,
         primaryKey: true
     },
+    nome: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    name: {
+    senha: {
         type: DataTypes.STRING,
         allowNull: false
     }
@@ -26,8 +26,8 @@ async function getUserByEmail(email) {
     return await User.findOne({ where: { email } });
 }
 
-async function createUser(email, password, name) {
-    return await User.create({ email, password, name });
+async function createUser(nome, email, senha) {
+    return await User.create({ nome, email, senha });
 }
 
 async function getUserById(id) {

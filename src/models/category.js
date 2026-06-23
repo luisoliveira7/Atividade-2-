@@ -7,9 +7,13 @@ const Category = sequelize.define('categories', {
         autoIncrement: true,
         primaryKey: true
     },
-    name: {
+    nome: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    descricao: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 
@@ -22,14 +26,15 @@ async function getById(id) {
 }
 
 async function criar(dados) {
-    return await Category.create({ name: dados.name });
+    return await Category.create({ nome: dados.nome, descricao: dados.descricao });
 }
 
 async function atualizar(id, dados) {
     const category = await getById(id);
     if (!category) return null;
 
-    category.name = dados.name || category.name;
+    category.nome = dados.nome || category.nome;
+    category.descricao = dados.descricao || category.descricao;
 
     await category.save();
     return category;
