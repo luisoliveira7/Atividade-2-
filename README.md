@@ -1,37 +1,39 @@
-# Sistema de Despesas Pessoais
+# Sistema de Controle de Despesas
 
 ## Sobre
-Esse projeto é uma API que eu fiz em Node.js para controlar despesas pessoais.
-Agora organizado em MVC e seguindo o padrão RESTful Level 3 (HATEOAS).
+API RESTful para controle de despesas pessoais feita em Node.js com Express, Sequelize e MySQL, seguindo o padrão MVC.
 
-Dá pra:
-- adicionar despesa
-- listar todas
-- buscar por id
-- atualizar
-- remover
-- ver total gasto
-- ver total por categoria
-
-## O que usei
+## Tecnologias usadas
 - Node.js
 - Express
+- Sequelize
+- MySQL
+- JWT
+- bcrypt
 
-## Estrutura MVC
-- models/expense.js → cuida dos dados (lê e salva no expenses.json)
-- controllers/expense.js → validações e regras
-- views/expense.js → recebe as requisições e chama o controller
-- app.js → rotas e inicialização do servidor
+## Estrutura do projeto
+```
+src/
+  config/        → configurações de autenticação
+  controllers/   → regras e validações
+  database/      → migrations e seeders
+  middlewares/   → autenticação JWT
+  models/        → conexão com banco e definição das tabelas
+  routes/        → rotas da API
+  views/         → recebe req/res e chama os controllers
+app.js           → inicialização do servidor
+```
 
 ## Como rodar
-No terminal dentro da pasta do projeto:
 
+Instala as dependências:
 ```
 npm install
 ```
 
-Depois:
+Inicia o XAMPP e cria um banco MySQL chamado `mvc`.
 
+Roda o servidor:
 ```
 node app.js
 ```
@@ -40,38 +42,90 @@ Vai rodar em: http://localhost:3000
 
 ## Rotas
 
+### Auth (públicas)
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | /expenses | Lista todas as despesas |
-| GET | /expenses/:id | Busca uma despesa pelo id |
-| POST | /expenses | Cria uma nova despesa |
-| PUT | /expenses/:id | Atualiza uma despesa |
-| DELETE | /expenses/:id | Remove uma despesa |
-| GET | /expenses/summary/total | Total gasto |
-| GET | /expenses/summary/category | Total por categoria |
+| POST | /users | Cadastrar usuário |
+| POST | /auth/login | Login, retorna token JWT |
 
-## Exemplo de body para POST e PUT
+### Categorias (requer token)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /categories | Listar categorias |
+| GET | /categories/:id | Buscar por id |
+| POST | /categories | Criar categoria |
+| PUT | /categories/:id | Atualizar categoria |
+| DELETE | /categories/:id | Remover categoria |
+
+### Despesas (requer token)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /expenses | Listar despesas do usuário |
+| GET | /expenses/:id | Buscar por id |
+| POST | /expenses | Criar despesa |
+| PUT | /expenses/:id | Atualizar despesa |
+| DELETE | /expenses/:id | Remover despesa |
+
+### Filtros disponíveis
+```
+GET /expenses?status=PAGA
+GET /expenses?categoriaId=1
+GET /expenses?valorMin=50&valorMax=200
+GET /expenses?dataInicio=2026-01-01&dataFim=2026-12-31
+```
+
+### Dashboard (requer token)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | /dashboard/total-expenses | Total gasto |
+| GET | /dashboard/expenses-count | Quantidade de despesas |
+| GET | /dashboard/expenses-by-category | Total por categoria |
+
+## Exemplo de uso
+
+### Cadastrar usuário
 ```json
+POST /users
 {
-  "title": "Mercado",
-  "amount": 100,
-  "category": "Alimentacao",
-  "date": "2026-03-10",
-  "description": "Compra"
+  "nome": "Luis",
+  "email": "luis@email.com",
+  "senha": "123456"
 }
 ```
 
-## RESTful Level 3
-Cada resposta retorna _links com as ações disponíveis, por exemplo:
+### Login
 ```json
+POST /auth/login
 {
-  "id": "1",
-  "title": "Mercado",
-  "_links": [
-    { "rel": "self", "method": "GET", "href": "/expenses/1" },
-    { "rel": "atualizar", "method": "PUT", "href": "/expenses/1" },
-    { "rel": "remover", "method": "DELETE", "href": "/expenses/1" },
-    { "rel": "listar", "method": "GET", "href": "/expenses" }
-  ]
+  "email": "luis@email.com",
+  "senha": "123456"
 }
 ```
+Retorna:
+```json
+{ "token": "eyJ..." }
+```
+
+### Criar despesa (com token no Authorization Bearer)
+```json
+POST /expenses
+{
+  "descricao": "Mercado",
+  "valor": 100,
+  "data": "2026-06-01",
+  "status": "PAGA",
+  "categoriaId": 1
+}
+```
+
+## Relacionamentos
+- Um usuário possui várias despesas
+- Uma categoria possui várias despesas
+- Uma despesa pertence a um usuário
+- Uma despesa pertence a uma categoria
+
+## Segurança
+- Senhas criptografadas com bcrypt
+- Autenticação via JWT
+- Rotas protegidas por middleware
+- Cada usuário acessa apenas as próprias despesas
