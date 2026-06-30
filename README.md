@@ -10,11 +10,12 @@ API RESTful para controle de despesas pessoais feita em Node.js com Express, Seq
 - MySQL
 - JWT
 - bcrypt
+- dotenv
 
 ## Estrutura do projeto
 ```
 src/
-  config/        → configurações de autenticação
+  config/        → configurações de autenticação e banco
   controllers/   → regras e validações
   database/      → migrations e seeders
   middlewares/   → autenticação JWT
@@ -26,14 +27,27 @@ app.js           → inicialização do servidor
 
 ## Como rodar
 
-Instala as dependências:
+### 1. Instalar dependências
 ```
 npm install
 ```
 
-Inicia o XAMPP e cria um banco MySQL chamado `mvc`.
+### 2. Criar o banco de dados
+Inicia o XAMPP (ou outro serviço MySQL) e cria um banco chamado `mvc`.
 
-Roda o servidor:
+### 3. Criar o arquivo .env
+Na raiz do projeto, cria um arquivo chamado `.env` com o seguinte conteúdo:
+```
+JWT_SECRET=segredo_super_secreto
+JWT_EXPIRES_IN=1d
+DB_NAME=mvc
+DB_USER=root
+DB_PASS=
+DB_HOST=127.0.0.1
+```
+Esse arquivo não vem no repositório por questões de segurança, por isso precisa ser criado manualmente.
+
+### 4. Rodar o servidor
 ```
 node app.js
 ```
